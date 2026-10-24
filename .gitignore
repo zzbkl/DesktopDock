@@ -1,0 +1,14 @@
+# 构建产物
+build/
+*.exe
+*.pdb
+
+# 本地备份 / 实验脚本
+.bak/
+probe/
+shots/
+research/
+
+# 日志
+*.log
+dock.log
