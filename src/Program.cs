@@ -141,11 +141,8 @@ namespace DesktopDock
 
             DockWindow dock = new DockWindow();
             DrawerWindow drawer = new DrawerWindow();
-            WidgetPanel widgets = new WidgetPanel();
 
             dock.Drawer = drawer;
-            dock.Widgets = widgets;
-            dock.WidgetWanted = ConfigStore.LoadSettings().ShowWidgets;
             dock.SetItems(ApplyPinOrder(pinned));
             drawer.SetApps(all);
 
@@ -172,19 +169,6 @@ namespace DesktopDock
                     Log("heal-test: timers stopped, strip hidden");
                 };
                 ht.Start();
-            }
-
-            if (args != null && Array.IndexOf(args, "--widget-test") >= 0)
-            {
-                DispatcherTimer wt = new DispatcherTimer();
-                wt.Interval = TimeSpan.FromSeconds(5);
-                wt.Tick += delegate(object s9, EventArgs e9)
-                {
-                    wt.Stop();
-                    dock.HideDock();
-                    Log("widget-test: dock hidden, widgets shown=" + (dock.Widgets != null && dock.Widgets.Showing).ToString());
-                };
-                wt.Start();
             }
 
             // 看门狗：每 15 秒体检一次，防止"从游戏/全屏回来之后叫不出来"

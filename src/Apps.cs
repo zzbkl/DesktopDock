@@ -383,13 +383,8 @@ namespace DesktopDock
             public int TintTop { get; set; }
             public int TintBottom { get; set; }
             public bool UseIconPack { get; set; }
-            public bool ShowWidgets { get; set; }
-        // true = 小组件只在桌面/栏展开时出现，不压住其它窗口
-        public bool WidgetsDesktopOnly { get; set; }
             // 回到桌面时自动亮出 dock（false = 只能手点把手 / 托盘 / 热角叫出）
             public bool AutoShowOnDesktop { get; set; }
-            public int WidgetX { get; set; }
-            public int WidgetY { get; set; }
             // 应用自动发现：来源开关 + 自动刷新间隔（分钟，0=关）
             public bool ScanUwp { get; set; }
             public bool ScanSteam { get; set; }
@@ -412,11 +407,7 @@ namespace DesktopDock
                 TintTop = 0x36;
                 TintBottom = 0x62;
                 UseIconPack = true;
-                ShowWidgets = true;
-            WidgetsDesktopOnly = true;
                 AutoShowOnDesktop = true;
-                WidgetX = -1;
-                WidgetY = -1;
                 ScanUwp = true;
                 ScanSteam = true;
                 ScanDeep = false;

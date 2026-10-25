@@ -68,10 +68,7 @@ namespace DesktopDock
         private Action orderChanged;
 
         public DrawerWindow Drawer { get; set; }
-        public WidgetPanel Widgets { get; set; }
 
-        // 小组件"想要显示"的开关：设置里勾选 / 取消，右键只是临时收起
-        public bool WidgetWanted { get; set; }
         public PeekWindow Peek { get; set; }
         public System.Windows.Controls.ContextMenu BarMenu { get; set; }
         public List<AppItem> Items { get; set; }
@@ -108,7 +105,7 @@ namespace DesktopDock
 
             CreateContent();
             LoadHotCorners();
-            LoadWidgetPrefs();
+            LoadDeskPrefs();
         }
 
         private void CreateContent()
@@ -1093,7 +1090,7 @@ namespace DesktopDock
                 PositionAtBottom();
                 if (expanded) RefreshBackdrop();
                 LoadHotCorners();
-            LoadWidgetPrefs();
+                LoadDeskPrefs();
                 Program.Log("appearance applied: icon=" + IconSize.ToString("0") + " bar=" + BarHeight.ToString("0") + " tint=" + TintTop.ToString("X") + "/" + TintBottom.ToString("X"));
             }
             catch (Exception ex) { Program.Log("apply settings failed: " + ex.Message); }
@@ -1128,7 +1125,6 @@ namespace DesktopDock
                     new Action(delegate
                     {
                         if (!expanded) return;
-                        if (Widgets != null && ConfigStore.LoadSettings().ShowWidgets) Widgets.ShowAbove(this, false);
                         RefreshDots();
                     }));
                 Program.Log("dock show " + swOpen.Elapsed.TotalMilliseconds.ToString("0.0") + "ms cache=" + (cacheHit ? "hit" : "miss"));
@@ -1467,19 +1463,9 @@ namespace DesktopDock
         private string hotTL = "", hotTR = "", hotBL = "", hotBR = "";
         private string hotFired = "";
 
-        private bool widgetsDesktopOnly = true;
-
-        private IntPtr WidgetsHandle()
-        {
-            if (Widgets == null) return IntPtr.Zero;
-            try { return new WindowInteropHelper(Widgets).Handle; }
-            catch { return IntPtr.Zero; }
-        }
-
-        public void LoadWidgetPrefs()
+        public void LoadDeskPrefs()
         {
             ConfigStore.DockSettings c = ConfigStore.LoadSettings();
-            widgetsDesktopOnly = c.WidgetsDesktopOnly;
             deskAutoShow = c.AutoShowOnDesktop;
         }
 
@@ -1791,7 +1777,7 @@ namespace DesktopDock
             // 不加这层豁免，下一拍就判成"离开桌面"，dock 自己把自己藏了。
             bool deskBase = deskAutoShow && !ForceVisible && !gameMode &&
                             (Native.IsDesktopForeground(selfH) || Native.IsDesktopForeground(peekH) ||
-                             Native.IsDesktopForeground(drawerH) || Native.IsDesktopForeground(WidgetsHandle()));
+                             Native.IsDesktopForeground(drawerH));
             // 已经在桌面显示中时，任务栏 / 通知区 / Alt-Tab 过渡窗抢一下前台不算离开桌面
             d.Desktop = deskBase ||
                         (deskShown && deskAutoShow && !ForceVisible && !gameMode && Native.IsShellForeground());
@@ -1954,21 +1940,7 @@ namespace DesktopDock
             {
                 if (expanded) HideDock();
                 if (Peek != null && Peek.IsVisible) Peek.Hide();
-                if (Widgets != null && Widgets.Showing) Widgets.HidePanel();
                 return;
-            }
-
-            // 小组件：默认只在桌面/栏展开/鼠标压在上面时显示，不再压住其它应用窗口。
-            if (Widgets != null)
-            {
-                bool wantWidget = WidgetWanted;
-                if (wantWidget && widgetsDesktopOnly)
-                {
-                    bool deskNow = Native.IsDesktopForeground(WidgetsHandle());
-                    if (!deskNow && !expanded && !Widgets.IsMouseOver) wantWidget = false;
-                }
-                if (wantWidget && !Widgets.Showing) Widgets.ShowAbove(this, false);
-                else if (!wantWidget && Widgets.Showing) Widgets.HidePanel();
             }
 
             bool overDock = IsMouseOver;

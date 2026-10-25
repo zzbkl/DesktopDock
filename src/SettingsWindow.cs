@@ -588,51 +588,6 @@ namespace DesktopDock
                 ? "图标包目录：把 macOS 风格的 png 放进 %APPDATA%\\DesktopDock\\icons 即可（支持 pack.json 清单）。"
                 : "图标包目录：" + IconPack.Folder));
 
-            // 小组件：时间 / CPU / 内存 贴在栏上方
-            StackPanel wRow = new StackPanel();
-            wRow.Orientation = Orientation.Horizontal;
-            wRow.Margin = new Thickness(0, 12, 0, 0);
-            CheckBox wBox = new CheckBox();
-            wBox.Content = "在栏上方显示小组件（时间 / CPU / 内存 / 网速）";
-            wBox.FontSize = 13;
-            wBox.Foreground = Brushes.White;
-            wBox.IsChecked = cfg.ShowWidgets;
-            wBox.VerticalAlignment = VerticalAlignment.Center;
-            wRow.Children.Add(wBox);
-            wBox.Click += delegate
-            {
-                cfg.ShowWidgets = wBox.IsChecked == true;
-                ConfigStore.SaveSettings(cfg);
-                if (dock.Widgets != null)
-                {
-                    dock.WidgetWanted = cfg.ShowWidgets;
-                    if (cfg.ShowWidgets) dock.Widgets.ShowAbove(dock, true);
-                    else dock.Widgets.HidePanel();
-                }
-            };
-            s.Children.Add(wRow);
-
-            // 不压住窗口：默认只在桌面 / 栏展开时出现
-            StackPanel wdRow = new StackPanel();
-            wdRow.Orientation = Orientation.Horizontal;
-            wdRow.Margin = new Thickness(0, 8, 0, 0);
-            CheckBox wdBox = new CheckBox();
-            wdBox.Content = "小组件不压住窗口（只在桌面或栏展开时出现）";
-            wdBox.FontSize = 13;
-            wdBox.Foreground = Brushes.White;
-            wdBox.IsChecked = cfg.WidgetsDesktopOnly;
-            wdBox.VerticalAlignment = VerticalAlignment.Center;
-            wdRow.Children.Add(wdBox);
-            wdBox.Click += delegate
-            {
-                cfg.WidgetsDesktopOnly = wdBox.IsChecked == true;
-                ConfigStore.SaveSettings(cfg);
-                dock.LoadWidgetPrefs();
-                if (!cfg.WidgetsDesktopOnly && dock.Widgets != null) dock.Widgets.ShowAbove(dock, true);
-                Program.Log("widgets: desktop-only=" + cfg.WidgetsDesktopOnly.ToString());
-            };
-            s.Children.Add(wdRow);
-
             // 回到桌面时自动显示：边沿触发，只在"从别处回到桌面"那一下亮出来
             StackPanel deskRow = new StackPanel();
             deskRow.Orientation = Orientation.Horizontal;
@@ -648,23 +603,10 @@ namespace DesktopDock
             {
                 cfg.AutoShowOnDesktop = deskBox.IsChecked == true;
                 ConfigStore.SaveSettings(cfg);
-                dock.LoadWidgetPrefs();
+                dock.LoadDeskPrefs();
                 Program.Log("desk auto-show=" + cfg.AutoShowOnDesktop.ToString());
             };
             s.Children.Add(deskRow);
-
-            Button wReset = ActionButton("小组件回到栏上方（清掉手动拖的位置）", delegate
-            {
-                ConfigStore.DockSettings c2 = ConfigStore.LoadSettings();
-                c2.WidgetX = -1;
-                c2.WidgetY = -1;
-                ConfigStore.SaveSettings(c2);
-                dock.WidgetWanted = true;
-                if (dock.Widgets != null) dock.Widgets.ShowAbove(dock, true);
-                Program.Log("widgets: position reset");
-            });
-            wReset.Margin = new Thickness(0, 8, 0, 0);
-            s.Children.Add(wReset);
 
             Button reset = ActionButton("恢复默认", delegate
             {
